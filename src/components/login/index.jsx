@@ -1,14 +1,57 @@
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import React from "react";
 import styled from "styled-components";
+import {
+  selectUserName,
+  setUserLoginDetails,
+} from "../../utils/fetures/user/userSlice";
+import { provider } from "../../utils/firebase";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const userName = useSelector(selectUserName);
+  const auth = getAuth();
+
+  const handleAuth = async () => {
+    const auth = getAuth();
+    if (!userName) {
+      signInWithPopup(auth, provider)
+        .then((result) => {
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          const token = credential.accessToken;
+          const user = result.user;
+          setUser(user);
+        })
+        .catch((error) => {
+          console.log(error.code);
+        });
+    } else if (userName) {
+      auth.signOut().then((_) => {
+        dispatch(setUserLoginDetails({}));
+        navigate("/home");
+      });
+    }
+  };
+
+  const setUser = (user) => {
+    dispatch(
+      setUserLoginDetails({
+        name: user.displayName,
+        email: user.email,
+        photo: user.photoURL,
+      })
+    );
+  };
   return (
     <>
       <Container>
         <Content>
           <CTA>
             <CTALogoOne src={"/images/cta-logo-one.svg"} />
-            <SignUp> GET ALL THERE </SignUp>
+            <SignUp onClick={handleAuth}> GET ALL THERE</SignUp>
             <Description>
               Get Premier Access to Raya and the Last Dragon for an additional
               fee with a Disney+ subscription. As of 03/26/21, the price of
@@ -87,6 +130,7 @@ const SignUp = styled.a`
   &:hover {
     background-color: #0483ee;
   }
+  cursor: pointer;
 `;
 
 const Description = styled.p`

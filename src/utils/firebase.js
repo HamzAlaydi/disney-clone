@@ -17,11 +17,11 @@ const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
-provider.addScope("https://www.googleapis.com/auth/contacts.readonly");
+// add auth role to user
+provider.setCustomParameters({ prompt: "select_account" });
+provider.role = "admin";
+
 auth.languageCode = "it";
-provider.setCustomParameters({
-  login_hint: "user@example.com",
-});
 
 const db = getFirestore(app);
 
